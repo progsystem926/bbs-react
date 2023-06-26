@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import {
   collection,
   addDoc,
@@ -7,6 +6,8 @@ import {
   serverTimestamp,
   orderBy,
   query,
+  deleteDoc,
+  doc,
 } from "firebase/firestore";
 import { format } from "date-fns";
 import { db } from "../../firebase";
@@ -31,7 +32,7 @@ const Home = () => {
     querySnapshot.docs.map((doc) => {
       const data = doc.data({ serverTimestamps: "estimate" });
       const post: Post = {
-        id: data.id,
+        id: doc.id,
         content: data.content,
         username: data.username,
         createdAt: format(data.createdAt.toDate(), "yyyy-MM-dd HH:mm:ss"),
@@ -57,9 +58,7 @@ const Home = () => {
   };
 
   const onClickSubmit = async () => {
-    const uniqueId = uuidv4();
     await addDoc(postsRef, {
-      id: uniqueId,
       content: newPostContent,
       username: loginUsername,
       createdAt: serverTimestamp(),
@@ -73,10 +72,15 @@ const Home = () => {
     setNewPostContent(e.target.value);
   };
 
+  const onClickDelete = async (id: string) => {
+    await deleteDoc(doc(db, "posts", id));
+    fetchPosts();
+  };
+
   return (
     <>
       <Header onClickNewPost={onClickNewPost} loginUsername={loginUsername} />
-      <PostList posts={posts} />
+      <PostList posts={posts} onClickDelete={onClickDelete} />
       <NewPostModal
         open={newPostOpen}
         handleClose={handleCloseNewPost}
