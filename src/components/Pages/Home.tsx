@@ -26,7 +26,6 @@ const Home = () => {
   const fetchPosts = async () => {
     const q = query(postsRef, orderBy("createdAt", "desc"));
     const querySnapshot = await getDocs(q);
-    // setPosts(querySnapshot.docs.map((doc) => doc.data() as Post));
 
     const tmpPosts: Post[] = [];
     querySnapshot.docs.map((doc) => {
