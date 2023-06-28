@@ -3,6 +3,7 @@ import "./App.css";
 import Home from "./components/Pages/Home";
 import Login from "./components/Pages/Login";
 import { createContext, useState } from "react";
+import Signup from "./components/Pages/Signup";
 
 export const LoginUsernameContext = createContext(
   {} as {
@@ -20,6 +21,7 @@ function App() {
     <LoginUsernameContext.Provider value={{ loginUsername, setLoginUsername }}>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
       </Routes>
     </LoginUsernameContext.Provider>

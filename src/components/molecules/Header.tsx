@@ -38,14 +38,24 @@ const Header: FC<Props> = (props) => {
               </Button>
             </>
           ) : (
-            <Button color="inherit">
-              <Link
-                to={`login`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Login
-              </Link>
-            </Button>
+            <>
+              <Button color="inherit">
+                <Link
+                  to={`/signup`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  Sign up
+                </Link>
+              </Button>
+              <Button color="inherit">
+                <Link
+                  to={`/login`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  Login
+                </Link>
+              </Button>
+            </>
           )}
         </Toolbar>
       </AppBar>

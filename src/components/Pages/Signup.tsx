@@ -3,15 +3,15 @@ import Header from "../molecules/Header";
 import { LoginUsernameContext } from "../../App";
 import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebase";
 
-const Login = () => {
+const Signup = () => {
   const navigate = useNavigate();
   const { loginUsername, setLoginUsername } = useContext(LoginUsernameContext);
   const [emptyUsernameAlert, setEmptyUsernameAlert] = useState(false);
   const [emptyPasswordAlert, setEmptyPasswordAlert] = useState(false);
-  const [authAlert, setAuthAlert] = useState(false);
+  const [existUsernameAlert, setExistUsernameAlert] = useState(false);
 
   const usersRef = collection(db, "users");
 
@@ -19,7 +19,7 @@ const Login = () => {
     event.preventDefault();
     setEmptyUsernameAlert(false);
     setEmptyPasswordAlert(false);
-    setAuthAlert(false);
+    setExistUsernameAlert(false);
     const data = new FormData(event.currentTarget);
     const username = data.get("username") as string;
     const password = data.get("password") as string;
@@ -34,19 +34,17 @@ const Login = () => {
     }
     const q = query(usersRef, where("username", "==", username));
     const querySnapshot = await getDocs(q);
-    if (querySnapshot.size === 0) {
-      setAuthAlert(true);
+    if (querySnapshot.size !== 0) {
+      setExistUsernameAlert(true);
       return;
     }
-    querySnapshot.forEach(async (doc) => {
-      if (doc.data().password === password) {
-        setLoginUsername(username);
-        localStorage.setItem("username", username);
-        navigate("/");
-      } else {
-        setAuthAlert(true);
-      }
+    await addDoc(usersRef, {
+      username: username,
+      password: password,
     });
+    setLoginUsername(username);
+    localStorage.setItem("username", username);
+    navigate("/");
   };
 
   useEffect(() => {
@@ -59,7 +57,7 @@ const Login = () => {
     <>
       <Header loginUsername={loginUsername} />
       <Typography component="h1" variant="h5" align="center" sx={{ mt: 2 }}>
-        Login
+        Sign up
       </Typography>
       <Box
         component="form"
@@ -73,8 +71,8 @@ const Login = () => {
             Empty password
           </Alert>
         )}
-        {authAlert && (
-          <Alert severity="error">Incorrect username or password</Alert>
+        {existUsernameAlert && (
+          <Alert severity="error">The username is already in use</Alert>
         )}
         <TextField
           margin="normal"
@@ -100,11 +98,11 @@ const Login = () => {
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
         >
-          Login
+          Sign up
         </Button>
       </Box>
     </>
   );
 };
 
-export default Login;
+export default Signup;
