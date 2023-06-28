@@ -3,22 +3,50 @@ import Header from "../molecules/Header";
 import { LoginUsernameContext } from "../../App";
 import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../../firebase";
 
 const Login = () => {
   const navigate = useNavigate();
   const { loginUsername, setLoginUsername } = useContext(LoginUsernameContext);
-  const [emptyAlert, setEmptyAlert] = useState(false);
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const [emptyUsernameAlert, setEmptyUsernameAlert] = useState(false);
+  const [emptyPasswordAlert, setEmptyPasswordAlert] = useState(false);
+  const [emptyAuthAlert, setEmptyAuthAlert] = useState(false);
+
+  const usersRef = collection(db, "users");
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setEmptyUsernameAlert(false);
+    setEmptyPasswordAlert(false);
+    setEmptyAuthAlert(false);
     const data = new FormData(event.currentTarget);
     const username = data.get("username") as string;
+    const password = data.get("password") as string;
     if (!username) {
-      setEmptyAlert(true);
+      setEmptyUsernameAlert(true);
+    }
+    if (!password) {
+      setEmptyPasswordAlert(true);
+    }
+    if (!username || !password) {
       return;
     }
-    setLoginUsername(username);
-    localStorage.setItem("username", username);
-    navigate("/");
+    const q = query(usersRef, where("username", "==", username));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.size === 0) {
+      setEmptyAuthAlert(true);
+      return;
+    }
+    querySnapshot.forEach(async (doc) => {
+      if (doc.data().password === password) {
+        setLoginUsername(username);
+        localStorage.setItem("username", username);
+        navigate("/");
+      } else {
+        setEmptyAuthAlert(true);
+      }
+    });
   };
 
   useEffect(() => {
@@ -39,7 +67,15 @@ const Login = () => {
         noValidate
         sx={{ mt: 1, width: "80%", mx: "auto" }}
       >
-        {emptyAlert && <Alert severity="error">Empty username</Alert>}
+        {emptyUsernameAlert && <Alert severity="error">Empty username</Alert>}
+        {emptyPasswordAlert && (
+          <Alert sx={{ mt: 1 }} severity="error">
+            Empty password
+          </Alert>
+        )}
+        {emptyAuthAlert && (
+          <Alert severity="error">Incorrect username or password</Alert>
+        )}
         <TextField
           margin="normal"
           required
@@ -47,6 +83,15 @@ const Login = () => {
           id="username"
           label="Username"
           name="username"
+          autoFocus
+        />
+        <TextField
+          margin="normal"
+          required
+          fullWidth
+          id="password"
+          label="Password"
+          name="password"
           autoFocus
         />
         <Button
