@@ -92,7 +92,6 @@ const Login = () => {
           id="password"
           label="Password"
           name="password"
-          autoFocus
         />
         <Button
           type="submit"
