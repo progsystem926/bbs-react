@@ -21,10 +21,12 @@ const Home = () => {
   const [newPostOpen, setNewPostOpen] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPostContent, setNewPostContent] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const postsRef = collection(db, "posts");
 
   const fetchPosts = async () => {
+    setIsLoading(true);
     const q = query(postsRef, orderBy("createdAt", "desc"));
     const querySnapshot = await getDocs(q);
 
@@ -40,6 +42,7 @@ const Home = () => {
       tmpPosts.push(post);
     });
     setPosts(tmpPosts);
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -80,7 +83,11 @@ const Home = () => {
   return (
     <>
       <Header onClickNewPost={onClickNewPost} loginUsername={loginUsername} />
-      <PostList posts={posts} onClickDelete={onClickDelete} />
+      <PostList
+        posts={posts}
+        onClickDelete={onClickDelete}
+        isLoading={isLoading}
+      />
       <NewPostModal
         open={newPostOpen}
         handleClose={handleCloseNewPost}
