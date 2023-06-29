@@ -27,7 +27,13 @@ const PostList: FC<Props> = (props) => {
         <React.Fragment key={post.id}>
           <ListItem alignItems="flex-start">
             <ListItemText
-              primary={post.content}
+              primary={
+                <Typography
+                  sx={{ fontSize: "1.2em", overflowWrap: "break-word" }}
+                >
+                  {post.content}
+                </Typography>
+              }
               secondary={
                 <React.Fragment>
                   <Typography
